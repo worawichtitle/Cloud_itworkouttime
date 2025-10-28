@@ -13,7 +13,7 @@ class User(models.Model):
 
 
 class Workout(models.Model):
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255) # running, swimming, cardio
     cal125_hour = models.PositiveIntegerField()
     cal155_hour = models.PositiveIntegerField()
     cal185_hour = models.PositiveIntegerField()
@@ -25,6 +25,9 @@ class Workout(models.Model):
 class Plan(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     workout = models.ForeignKey(Workout, on_delete=models.SET_NULL, null=True)
+    day = models.IntegerField(choices=[(i, day) for i, day in enumerate(
+        ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    )])
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
 

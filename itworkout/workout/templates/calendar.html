@@ -1,0 +1,79 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      {% block title %}
+      {% endblock %}
+    </title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+    <style type="text/tailwindcss">
+      @layer components {
+        body {
+            font-family: 'Sarabun', sans-serif;
+        }
+
+        .gradient-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .smooth-transition {
+            transition: all 0.3s ease-in-out;
+        }
+
+        .custom-shadow {
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-control {
+            @apply [&>*>input]:mt-1 [&>*>input]:border-2 [&>*>input]:border-gray-200 [&>*>input]:rounded-xl [&>*>input]:w-full [&>*>input]:px-4 [&>*>input]:py-3 [&>*>input]:focus:outline-none [&>*>input]:focus:ring-2 [&>*>input]:focus:ring-blue-400 [&>*>input]:focus:border-transparent [&>*>input]:smooth-transition [&>*>input]:bg-white [&>*>input]:bg-opacity-70  [&>*>select]:mt-1 [&>*>select]:border-2 [&>*>select]:border-gray-200 [&>*>select]:rounded-xl [&>*>select]:w-full [&>*>select]:px-4 [&>*>select]:py-3 [&>*>select]:focus:outline-none [&>*>select]:focus:ring-2 [&>*>select]:focus:ring-blue-400 [&>*>select]:focus:border-transparent [&>*>select]:smooth-transition [&>*>select]:bg-white [&>*>select]:bg-opacity-70 [&>*>textarea]:mt-1 [&>*>textarea]:border-2 [&>*>textarea]:border-gray-200 [&>*>textarea]:rounded-xl [&>*>textarea]:w-full [&>*>textarea]:px-4 [&>*>textarea]:py-3 [&>*>textarea]:focus:outline-none [&>*>textarea]:focus:ring-2 [&>*>textarea]:focus:ring-blue-400 [&>*>textarea]:focus:border-transparent [&>*>textarea]:smooth-transition [&>*>textarea]:bg-white [&>*>textarea]:bg-opacity-70
+        }
+      }
+    </style>
+  </head>
+
+  <body class="gradient-bg min-h-screen">
+    <!-- Navbar -->
+    {% block nav %}
+    {% endblock %}
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-6 py-12">
+        <!-- Head Section -->
+        <section class="mb-8">
+        {% comment %} <section class="glass-effect rounded-2xl custom-shadow p-10 mb-8 border border-white border-opacity-30"> {% endcomment %}
+            {% block head %}
+            {% endblock %}
+        </section>
+
+        <!-- Content Section -->
+        <section class="glass-effect rounded-2xl custom-shadow p-10 border border-white border-opacity-30">
+            {% block content %} 
+            {% endblock %}
+        </section>
+    </main>
+  {% block footer %}
+  {% endblock %}
+    
+    
+    {% block script %}
+    {% endblock %}
+  </body>
+
+</html>
