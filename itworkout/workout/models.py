@@ -5,6 +5,7 @@ from django.contrib.auth.models import User as Authen
 class User(models.Model):
     authen = models.OneToOneField(Authen, on_delete=models.CASCADE)
     tel = models.CharField(max_length=20, blank=True, null=True)
+    user_image = models.FileField(upload_to="profile/", blank=True, null=True)
     role = models.CharField(max_length=100, blank=True, null=True, default='user')  # Trainer, admin
 
     def __str__(self):
