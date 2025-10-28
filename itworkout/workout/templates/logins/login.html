@@ -1,0 +1,57 @@
+{% extends "logins/base_login.html" %}
+
+{% load static %}
+
+{% block title %}เข้าสู่ระบบ - CardShop{% endblock %}
+
+{% block content %}
+<body class="gradient-bg min-h-screen flex flex-col items-center justify-center gap-8">
+
+    <!-- Header with "CardShop" -->
+    <header class="flex items-center justify-center text-center">
+        <h1 class="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mt-10">
+            IT-Workout
+        </h1>
+    </header>
+
+    <div class="glass-effect p-8 rounded-2xl custom-shadow w-full max-w-sm border border-white border-opacity-30">
+        <h2 class="text-3xl font-bold text-center mb-8 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent leading-loose">เข้าสู่ระบบ</h2>
+        <form method="POST" action="" >
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+
+            <!-- Username Field -->
+            <div class="mb-6">
+                <label for="{{ form.username.id_for_label }}" class="block text-sm font-semibold mb-3 text-gray-700">ชื่อผู้ใช้</label>
+                {{ form.username }}
+                    {% if form.username.errors %}
+                        <div class="text-sm text-red-600">{{ form.username.errors }}</div>
+                    {% endif %}
+            </div>
+
+            <!-- Password Field -->
+            <div class="mb-6">
+                <label for="{{ form.password.id_for_label }}" class="block text-sm font-semibold mb-3 text-gray-700">รหัสผ่าน</label>
+                {{ form.password }}
+                    {% if form.password.errors %}
+                        <div class="text-sm text-red-600">{{ form.password.errors }}</div>
+                    {% endif %}
+            </div>
+
+            <button type="submit" class="w-full py-4 bg-gradient-to-r from-purple-500 to-blue-500 text-white font-semibold rounded-xl hover:from-purple-600 hover:to-blue-600 shadow-lg hover:shadow-xl">เข้าสู่ระบบ</button>
+            
+            {% if messages %}
+                <div class="mt-6 p-4 bg-gradient-to-r from-red-50 to-pink-50 rounded-xl border border-red-200">
+                    {% for message in messages %}
+                        <p class="text-center text-sm text-red-600 font-medium">{{ message }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </form>
+        
+
+        <div class="mt-6 text-center">
+            <p class="text-sm text-gray-600">ยังไม่มีบัญชี? <a href="{% url 'register' %}" class="text-blue-600 hover:text-blue-700 font-semibold smooth-transition hover:underline">สมัครสมาชิก</a></p>
+        </div>
+    </div>
+{% endblock %}

@@ -1,10 +1,12 @@
 from django.contrib import admin
 from django.urls import include, path
-
-from workout.views import *
+from . import views
 
 urlpatterns = [
-    # path('', LoginView.as_view(), name='login'),
-    # path('logout/', LogoutView.as_view(), name="logout"),
+    path('', views.LoginView.as_view(), name='login'),
+    path('logout/', views.LogoutView.as_view(), name="logout"),
+    path('register/', views.RegisterView.as_view(), name='register'),
+    path("home/", views.HomeView.as_view(), name="home"),
+    path("profile/", views.ProfileEdit.as_view(), name='profile'),
 ]
 # test change
