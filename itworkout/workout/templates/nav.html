@@ -11,12 +11,6 @@
         background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
     }
 
-    .glass-effect {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
     .smooth-transition {
         transition: all 0.3s ease-in-out;
     }
@@ -35,10 +29,16 @@
                     </h1>
                     <ul class="flex space-x-8">
                         <li>
-                            <a href="{% url 'home' %}" class="text-white hover:text-yellow-200 smooth-transition font-medium border-b-2 border-transparent hover:border-yellow-200">Home</a>
+                            <a href="{% url 'chat_list' %}" class="text-white hover:text-yellow-200 smooth-transition font-medium border-b-2 border-transparent hover:border-yellow-200">Chat</a>
                         </li>
                         <li>
-                            <a href="{% url 'chat_list' %}" class="text-white hover:text-yellow-200 smooth-transition font-medium border-b-2 border-transparent hover:border-yellow-200">Chat</a>
+                            <a href="{% url 'calendar' %}" class="text-white hover:text-yellow-200 smooth-transition font-medium border-b-2 border-transparent hover:border-yellow-200">Plan</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'calculate' %}" class="text-white hover:text-yellow-200 smooth-transition font-medium border-b-2 border-transparent hover:border-yellow-200">Calculate</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'history' %}" class="text-white hover:text-yellow-200 smooth-transition font-medium border-b-2 border-transparent hover:border-yellow-200">History</a>
                         </li>
                     </ul>
                 </div>
@@ -58,7 +58,7 @@
 
                     <!-- Profile Dropdown Menu (aside) -->
                     <aside class="absolute right-0 top-full mt-3 w-80 opacity-0 invisible group-hover:opacity-100 group-hover:visible transform transition-all ease-in-out z-50">
-                        <div class="glass-effect rounded-xl custom-shadow overflow-hidden border border-white border-opacity-20">
+                        <div class="bg-white rounded-xl custom-shadow overflow-hidden border border-white border-opacity-20">
                             <!-- User Info Header -->
                             <div class="px-6 py-5 border-b border-white border-opacity-20 bg-gradient-to-r from-purple-500 to-blue-500 bg-opacity-10">
                                 <div class="flex items-center space-x-4">
