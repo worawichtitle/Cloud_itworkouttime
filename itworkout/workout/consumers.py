@@ -67,3 +67,36 @@ class ChatConsumer(AsyncWebsocketConsumer):
         if profile:
             ChatMessage.objects.create(room=room, sender=profile, content=message)
         return None
+
+
+class NotificationConsumer(AsyncWebsocketConsumer):
+    """A simple per-user notification channel.
+
+    Clients should connect to /ws/notifications/ and the consumer will add them
+    to a group named `user_{profile_id}` so server-side code can push events to
+    individual users (for example, chat deletions).
+    """
+    async def connect(self):
+        user = self.scope.get('user')
+        if not user or not user.is_authenticated:
+            await self.close()
+            return
+
+        try:
+            profile = user.user
+        except Exception:
+            await self.close()
+            return
+
+        self.user_group_name = f'user_{profile.id}'
+        await self.channel_layer.group_add(self.user_group_name, self.channel_name)
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        if hasattr(self, 'user_group_name'):
+            await self.channel_layer.group_discard(self.user_group_name, self.channel_name)
+
+    async def user_notification(self, event):
+        # forward payload to WebSocket client
+        payload = event.get('payload', {})
+        await self.send(text_data=json.dumps(payload))

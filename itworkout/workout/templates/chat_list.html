@@ -54,8 +54,11 @@ function updateRoomsList() {
     fetch('{% url "chat_updates" %}')
         .then(response => response.json())
         .then(data => {
+      // Build set of returned room ids so we can remove DOM nodes for deleted rooms
+      const returnedIds = new Set();
             data.rooms.forEach(room => {
                 const roomElement = document.querySelector(`[data-room-id="${room.room_id}"]`);
+        returnedIds.add(String(room.room_id));
                 if (roomElement) {
                     const lastMessageElement = roomElement.querySelector('.last-message');
                     const lastTimeElement = roomElement.querySelector('.last-time');
@@ -69,11 +72,57 @@ function updateRoomsList() {
                     }
                 }
             });
+
+      // Remove any room elements that were not returned (deleted)
+      document.querySelectorAll('[data-room-id]').forEach(el => {
+        const id = el.getAttribute('data-room-id');
+        if (!returnedIds.has(id)) {
+          el.remove();
+        }
+      });
         });
 }
 
 // Update initially and then every 3 seconds
 updateRoomsList();
 setInterval(updateRoomsList, 3000);
+
+// Real-time notifications socket (for deletions etc.)
+(function() {
+  const loc = window.location;
+  const wsProtocol = loc.protocol === 'https:' ? 'wss' : 'ws';
+  const notificationsUrl = `${wsProtocol}://${loc.host}/ws/notifications/`;
+  let socket;
+
+  try {
+    socket = new WebSocket(notificationsUrl);
+  } catch (e) {
+    console.warn('WebSocket not available:', e);
+    return;
+  }
+
+  socket.addEventListener('open', function() {
+    console.log('Notifications socket open');
+  });
+
+  socket.addEventListener('message', function(ev) {
+    try {
+      const data = JSON.parse(ev.data);
+      if (data && data.event === 'chat_deleted') {
+        const roomId = data.room_id;
+        const el = document.querySelector(`[data-room-id="${roomId}"]`);
+        if (el) {
+          el.remove();
+        }
+      }
+    } catch (e) {
+      console.warn('Invalid notification payload', e);
+    }
+  });
+
+  socket.addEventListener('close', function() {
+    console.log('Notifications socket closed');
+  });
+})();
 </script>
 {% endblock %}

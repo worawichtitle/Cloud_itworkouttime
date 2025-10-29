@@ -14,5 +14,6 @@ urlpatterns = [
     path('chat/room/<int:room_id>/', views.ChatRoomView.as_view(), name='chat_room'),
     path('chat/messages/<int:room_id>/', views.ChatMessagesView.as_view(), name='chat_messages'),
     path('chat/updates/', views.ChatUpdatesView.as_view(), name='chat_updates'),
-    path('chat/mark_read/<int:room_id>/', views.chat_mark_read, name='chat_mark_read'),
+
+    path('chat/delete/<int:room_id>/', views.chat_delete, name='chat_delete'),
 ]

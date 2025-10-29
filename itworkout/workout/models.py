@@ -39,9 +39,6 @@ class ChatRoom(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='chat_user')
     trainer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='chat_trainer')
     created_at = models.DateTimeField(auto_now_add=True)
-    # track when each participant last read the room
-    user_last_read = models.DateTimeField(null=True, blank=True)
-    trainer_last_read = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"Room {self.id} ({self.user.username} ↔ {self.trainer.username})"

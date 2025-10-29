@@ -23,6 +23,8 @@ from django.utils.timezone import now
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 
 class LoginView(View):
     def get(self, request):
@@ -221,22 +223,9 @@ class ChatRoomView(LoginRequiredMixin, View):
         if me != room.user and me != room.trainer:
             return HttpResponseForbidden('Not a participant of this chat')
 
-        # mark room as read for this participant up to the latest message timestamp (prevents race where
-        # a message sent just before opening would still appear as unread)
-        last_msg = room.messages.order_by('-sent_at').first()
-        if last_msg:
-            last_read_time = last_msg.sent_at
-        else:
-            last_read_time = timezone.now()
-
-        if me == room.user:
-            room.user_last_read = last_read_time
-        else:
-            room.trainer_last_read = last_read_time
-        room.save()
-
         messages = room.messages.order_by('sent_at')[:500]
-        return render(request, 'chat_room.html', {'room': room, 'messages': messages, 'me': me})
+        other_user = room.trainer if me == room.user else room.user
+        return render(request, 'chat_room.html', {'room': room, 'messages': messages, 'me': me, 'other_user': other_user})
 
     def post(self, request, room_id):
         room = get_object_or_404(ChatRoom, id=room_id)
@@ -284,39 +273,28 @@ class ChatUpdatesView(LoginRequiredMixin, View):
 
         rooms = ChatRoom.objects.filter(Q(user=me) | Q(trainer=me)).order_by('-created_at')
         data = []
-        total_unread = 0
         for room in rooms:
             last = room.messages.order_by('-sent_at').first()
             if not last:
                 continue
-            if me == room.user:
-                last_read = room.user_last_read
-                other = room.trainer
-            else:
-                last_read = room.trainer_last_read
-                other = room.user
-
-            unread = False
-            if last and last.sender != me:
-                if not last_read or last.sent_at > last_read:
-                    unread = True
-                    total_unread += 1
-
+            other = room.trainer if me == room.user else room.user
             data.append({
                 'room_id': room.id,
                 'other_username': other.authen.username,
                 'last_message': last.content[:120],
-                'last_sent_at': last.sent_at.isoformat(),
-                'unread': unread,
+                'last_sent_at': last.sent_at.isoformat()
             })
 
-        return JsonResponse({'rooms': data, 'total_unread': total_unread})
+        return JsonResponse({'rooms': data})
+
+
+
 
 
 @login_required
 @require_POST
-def chat_mark_read(request, room_id):
-    """Mark the given room as read for the current user up to the latest message timestamp."""
+def chat_delete(request, room_id):
+    """Delete the chat room and its messages. Only a participant can delete a room."""
     room = get_object_or_404(ChatRoom, id=room_id)
     try:
         me = request.user.user
@@ -326,16 +304,27 @@ def chat_mark_read(request, room_id):
     if me != room.user and me != room.trainer:
         return JsonResponse({'error': 'not participant'}, status=403)
 
-    last_msg = room.messages.order_by('-sent_at').first()
-    if last_msg:
-        last_read_time = last_msg.sent_at
-    else:
-        last_read_time = timezone.now()
+    # capture participant ids before deleting
+    user_id = room.user.id
+    trainer_id = room.trainer.id
 
-    if me == room.user:
-        room.user_last_read = last_read_time
-    else:
-        room.trainer_last_read = last_read_time
-    room.save()
+    # delete room (messages cascade)
+    room.delete()
 
-    return JsonResponse({'status': 'ok'})
+    # notify both participants (if connected) that the room was deleted
+    channel_layer = get_channel_layer()
+    payload = {
+        'event': 'chat_deleted',
+        'room_id': room_id,
+    }
+
+    async_to_sync(channel_layer.group_send)(f'user_{user_id}', {
+        'type': 'user.notification',
+        'payload': payload,
+    })
+    async_to_sync(channel_layer.group_send)(f'user_{trainer_id}', {
+        'type': 'user.notification',
+        'payload': payload,
+    })
+
+    return JsonResponse({'status': 'ok', 'redirect': reverse('chat_list')})
