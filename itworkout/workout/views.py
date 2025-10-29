@@ -329,7 +329,7 @@ def chat_delete(request, room_id):
     })
 
     return JsonResponse({'status': 'ok', 'redirect': reverse('chat_list')})
-            return redirect('calendar')
+            # return redirect('calendar')
         
 
 class CalendarView(LoginRequiredMixin, View):

@@ -21,16 +21,13 @@
 </style>
 
 <header class="gradient-header shadow-lg">
-        <nav class="max-w-7xl mx-auto py-2 ml-5 mr-5">
+        <nav class="mx-auto py-2 ml-5 mr-10">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-12">
                     <h1 class="text-2xl font-bold text-white">
                         It-Workout
                     </h1>
                     <ul class="flex space-x-8">
-                        <li>
-                            <a href="{% url 'chat_list' %}" class="text-white hover:text-yellow-200 smooth-transition font-medium border-b-2 border-transparent hover:border-yellow-200">Chat</a>
-                        </li>
                         <li>
                             <a href="{% url 'calendar' %}" class="text-white hover:text-yellow-200 smooth-transition font-medium border-b-2 border-transparent hover:border-yellow-200">Plan</a>
                         </li>
@@ -39,6 +36,12 @@
                         </li>
                         <li>
                             <a href="{% url 'history' %}" class="text-white hover:text-yellow-200 smooth-transition font-medium border-b-2 border-transparent hover:border-yellow-200">History</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'chat_list' %}" class="text-white hover:text-yellow-200 smooth-transition font-medium border-b-2 border-transparent hover:border-yellow-200">Chat</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'trainers' %}" class="text-white hover:text-yellow-200 smooth-transition font-medium border-b-2 border-transparent hover:border-yellow-200">Trainer</a>
                         </li>
                     </ul>
                 </div>
