@@ -19,7 +19,7 @@ class LoginView(View):
 
     def post(self, request):
         form = AuthenticationForm(data=request.POST)
-        next_path = request.GET.get("next", 'home')
+        next_path = request.GET.get("next", 'calendar')
         if form.is_valid():
             user = form.get_user() 
             login(request,user)
@@ -63,7 +63,7 @@ class RegisterView(View):
                         # us.groups.add(default_group)
                         login(request, us)
 
-                        return redirect('home')
+                        return redirect('calendar')
                     else:
                         # หากฟอร์ม Customer ไม่ถูกต้อง
                         return render(request, 'logins/register.html', {"form": form, "error": "กรุณากรอกข้อมูลลูกค้าให้ครบถ้วน"})
@@ -91,7 +91,7 @@ class ProfileEdit(LoginRequiredMixin, View):
             }
             return render(request, 'homes/profile.html', context)
         except User.DoesNotExist:
-            return redirect('home')
+            return redirect('calendar')
 
     def post(self, request):
         try:
@@ -108,7 +108,7 @@ class ProfileEdit(LoginRequiredMixin, View):
                 profile.role = 'trainer' if is_trainer else 'user'
                 
                 profile.save()
-                return redirect('profile')
+                return redirect('calendar')
             
             context = {
                 'user_form': user_form,
@@ -116,7 +116,7 @@ class ProfileEdit(LoginRequiredMixin, View):
             }
             return render(request, 'homes/profile.html', context)
         except User.DoesNotExist:
-            return redirect('home')
+            return redirect('calendar')
         
 
 class CalendarView(LoginRequiredMixin, View):
@@ -135,8 +135,6 @@ class CalendarView(LoginRequiredMixin, View):
             start_time__date__range=(start_range, end_range)
         )
         print(plans)
-
-
         enriched_plans = []
         for plan in plans:
             duration = get_duration_minutes(plan.start_time, plan.end_time)
@@ -233,3 +231,74 @@ class DeletePlanView(LoginRequiredMixin, View):
         plan = get_object_or_404(Plan, id=plan_id, user=profile)
         plan.delete()
         return redirect('calendar')
+
+
+class CalculateView(LoginRequiredMixin, View):
+    def get(self, request):
+        profile = request.user.user
+        offset = int(request.GET.get('week_offset', 0))
+        reference_date = datetime.today() + timedelta(weeks=offset)
+
+        week_dates = get_week_dates(reference_date)
+        start_range = week_dates[0].date()
+        end_range = week_dates[-1].date()
+
+        plans = Plan.objects.filter(
+            user=profile,
+            start_time__date__range=(start_range, end_range)
+        ).select_related('workout')
+        print(plans)
+        exercise_count = plans.count()
+        if exercise_count == 0:
+            activity_factor = 1.2
+        elif exercise_count <= 3:
+            activity_factor = 1.375
+        elif exercise_count <= 5:
+            activity_factor = 1.55
+        elif exercise_count <= 7:
+            activity_factor = 1.725
+        else:
+            activity_factor = 1.9
+
+        context = {
+            'exercise_count': exercise_count,
+            'activity_factor': activity_factor,
+        }
+        return render(request, 'calculate/calculate.html', context)
+    
+class HistoryView(LoginRequiredMixin, View):
+    def get(self, request):
+        profile = request.user.user
+        offset = int(request.GET.get('week_offset', 0))
+        reference_date = datetime.today() + timedelta(weeks=offset)
+
+        week_dates = get_week_dates(reference_date)
+        start_range = week_dates[0].date()
+        end_range = week_dates[-1].date()
+
+        plans = Plan.objects.filter(
+            user=profile,
+            start_time__date__range=(start_range, end_range)
+        ).select_related('workout')
+        exercise_count = plans.count()
+        print(plans)
+        enriched_plans = []
+        for plan in plans:
+            duration = get_duration_minutes(plan.start_time, plan.end_time)
+            print("Duration:", duration)
+            print("hour", plan.start_time.hour, "minute:", plan.start_time.minute)
+            enriched_plans.append({
+                'id': plan.id,
+                'workout': plan.workout,
+                'start_time': plan.start_time,
+                'end_time': plan.end_time,
+                'duration': duration,
+            })
+        context = {
+            'plans': enriched_plans,
+            'offset': offset,
+            'exercise_count': exercise_count,
+            'week_dates': week_dates,
+            'week_range': f"{week_dates[0].strftime('%d %b')} - {week_dates[-1].strftime('%d %b %Y')}",
+        }
+        return render(request, 'calculate/history.html', context)

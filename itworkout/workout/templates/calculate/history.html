@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+
+{% block head %}
+{% endblock %}
+
+
+{% block content %}
+<div class="max-w-4xl mx-auto mt-10 bg-white p-8 rounded-2xl shadow-lg">
+    <h2 class="text-center font-bold mb-4 sticky left-0 z-10 text-3xl bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">Workout History: {{ week_range }}</h2>
+
+  <div class="w-full grid grid-cols-3 items-center mb-4 sticky left-0 z-10">
+    <div class="text-left">
+      <a href="?week_offset={{ offset|add:-1 }}" class="text-blue-600 hover:underline">← Last Week</a>
+    </div>
+    <div class="text-center">
+      <a href="{% url 'history' %}" class="text-blue-600 font-semibold hover:underline">This Week</a>
+    </div>
+    <div class="text-right">
+        {%if offset < 0 %}
+            <a href="?week_offset={{ offset|add:1 }}" class="text-blue-600 hover:underline">Next Week →</a>
+        {% endif %}
+    </div>
+  </div>
+
+  <!-- Summary section -->
+  <div class="grid grid-cols-3 text-center mb-8">
+    <div class="bg-blue-100 p-4 rounded-xl">
+      <div class="text-2xl font-bold text-blue-700">{{ exercise_count }}</div>
+      <div class="text-gray-600">Total Sessions</div>
+    </div>
+    <div class="bg-green-100 p-4 rounded-xl">
+      <div class="text-2xl font-bold text-green-700" id="total-minutes">0</div>
+      <div class="text-gray-600">Total Minutes</div>
+    </div>
+    <div class="bg-purple-100 p-4 rounded-xl">
+      <div class="text-2xl font-bold text-purple-700" id="total-calories">0</div>
+      <div class="text-gray-600">Calories Burned (kcal)</div>
+    </div>
+  </div>
+
+  <!-- Weight input -->
+  <form id="weight-form" class="flex items-center justify-center gap-4 mb-8">
+    <label class="font-semibold text-lg">Weight (kg):</label>
+    <input type="number" id="weight-input"
+           class="border border-gray-300 rounded-lg px-3 py-2 w-24 text-center focus:ring-2 focus:ring-blue-400"
+           min="30" max="200" placeholder="70">
+    <button type="button" id="calc-btn"
+            class="bg-blue-500 text-white px-5 py-2 rounded-lg hover:bg-blue-600 transition-all duration-200">
+      Calculate
+    </button>
+  </form>
+
+  <!-- Exercise list -->
+  <div class="overflow-x-auto">
+    <table class="w-full border-collapse">
+      <thead class="bg-gray-100">
+        <tr class="text-left text-gray-700">
+          <th class="p-3">Workout</th>
+          <th class="p-3">Start Time</th>
+          <th class="p-3">End Time</th>
+          <th class="p-3 text-right">Duration (min)</th>
+          <th class="p-3 text-right">Calories Burned</th>
+        </tr>
+      </thead>
+      <tbody id="history-body">
+        {% for plan in plans %}
+        <tr class="border-b hover:bg-gray-50 transition">
+          <td class="p-3 font-semibold">{{ plan.workout.name }}</td>
+          <td class="p-3">{{ plan.start_time|date:"d M Y, H:i" }}</td>
+          <td class="p-3">{{ plan.end_time|date:"H:i" }}</td>
+          <td class="p-3 text-right duration">{{ plan.duration }}</td>
+          <td class="p-3 text-right cal" data-cal125="{{ plan.workout.cal125_hour }}"
+              data-cal155="{{ plan.workout.cal155_hour }}"
+              data-cal185="{{ plan.workout.cal185_hour }}">0</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5" class="text-center text-gray-500 p-6">No exercises this week</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+
+{% block script %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const weightInput = document.getElementById('weight-input');
+  const calcBtn = document.getElementById('calc-btn');
+  const rows = document.querySelectorAll('#history-body tr');
+  const totalMinEl = document.getElementById('total-minutes');
+  const totalCalEl = document.getElementById('total-calories');
+
+  calcBtn.addEventListener('click', () => {
+    const weight = parseFloat(weightInput.value);
+    if (isNaN(weight) || weight <= 0) {
+      alert('Please enter a valid weight.');
+      return;
+    }
+
+    let totalMinutes = 0;
+    let totalCalories = 0;
+
+    rows.forEach(row => {
+      const duration = parseFloat(row.querySelector('.duration')?.textContent || 0);
+      const calCell = row.querySelector('.cal');
+      const cal125 = parseFloat(calCell.dataset.cal125);
+      const cal155 = parseFloat(calCell.dataset.cal155);
+      const cal185 = parseFloat(calCell.dataset.cal185);
+
+      // Estimate calories/hour based on weight
+      let calPerHour;
+      if (weight <= 57) calPerHour = cal125;
+      else if (weight <= 70) calPerHour = cal155;
+      else calPerHour = cal185;
+
+      const calBurned = calPerHour * (duration / 60);
+      calCell.textContent = calBurned.toFixed(0);
+
+      totalMinutes += duration;
+      totalCalories += calBurned;
+    });
+
+    totalMinEl.textContent = totalMinutes.toFixed(0);
+    totalCalEl.textContent = totalCalories.toFixed(0);
+  });
+});
+</script>
+{% endblock %}
