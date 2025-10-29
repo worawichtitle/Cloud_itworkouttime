@@ -32,7 +32,7 @@ class Plan(models.Model):
     end_time = models.DateTimeField()
 
     def __str__(self):
-        return f"{self.user.username} - {self.workout.name}"
+        return f"{self.user.authen.username} - {self.workout.name}"
 
 
 class ChatRoom(models.Model):

@@ -3,11 +3,14 @@ from django.views import View
 from workout.models import *
 from django.shortcuts import render, redirect
 from workout.forms import *
+from workout.utils.week import get_week_dates, get_duration_minutes
+
 from django.db import transaction
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import logout, login
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from datetime import datetime, timedelta, date
 
 class LoginView(View):
     def get(self, request):
@@ -114,3 +117,55 @@ class ProfileEdit(LoginRequiredMixin, View):
             return render(request, 'homes/profile.html', context)
         except User.DoesNotExist:
             return redirect('home')
+        
+
+class CalendarView(LoginRequiredMixin, View):
+    def get(self, request):
+        profile = request.user.user
+        print("Profile: ", profile, profile.tel)
+        offset = int(request.GET.get('week_offset', 0))
+        reference_date = datetime.today() + timedelta(weeks=offset)
+
+        week_dates = get_week_dates(reference_date)
+        start_range = week_dates[0].date()
+        end_range = week_dates[-1].date()
+
+        plans = Plan.objects.filter(
+            user=profile,
+            start_time__date__range=(start_range, end_range)
+        )
+        print(plans)
+
+
+        enriched_plans = []
+        for plan in plans:
+            duration = get_duration_minutes(plan.start_time, plan.end_time)
+            print("Duration:", duration)
+            print("hour", plan.start_time.hour, "minute:", plan.start_time.minute)
+            enriched_plans.append({
+                'id': plan.id,
+                'workout': plan.workout,
+                'day': plan.day,  # 0 = Monday
+                'start_time': plan.start_time,
+                'end_time': plan.end_time,
+                'start_minute': plan.start_time.minute,
+                # 'left_px': plan.start_hour * 60 + plan.start_minute,
+                'left_px': plan.start_time.minute * (100 / 60),
+                'width_px': duration * (100 / 60),
+            })
+
+
+        # days = ['จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์', 'อาทิตย์']
+        hours = [f"{h:02d}:00" for h in range(0, 24)]  # 00:00–24:00
+
+        context = {
+            'plans': enriched_plans,
+            # 'days': days,
+            'offset': offset,
+            'hours': hours,
+            'week_dates': week_dates,
+            'week_range': f"{week_dates[0].strftime('%d %b')} - {week_dates[-1].strftime('%d %b %Y')}",
+        }
+        return render(request, 'calendar/calendar.html', context)
+    
+
