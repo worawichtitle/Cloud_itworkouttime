@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.views import View
 from workout.models import *
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from workout.forms import *
 from workout.utils.week import get_week_dates, get_duration_minutes
 
@@ -167,5 +167,69 @@ class CalendarView(LoginRequiredMixin, View):
             'week_range': f"{week_dates[0].strftime('%d %b')} - {week_dates[-1].strftime('%d %b %Y')}",
         }
         return render(request, 'calendar/calendar.html', context)
+
+
+class AddPlanView(LoginRequiredMixin, View):
+    def get(self, request):
+        form = PlanForm()
+        context = {
+            'form': form,
+        }
+        return render(request, 'calendar/addcalendar.html', context)
+
+    def post(self, request):
+        profile = request.user.user
+        form = PlanForm(request.POST, instance=Plan(user=profile))
+        if form.is_valid():
+            plan = form.save(commit=False)
+            plan.user = profile
+            plan.day = plan.start_time.weekday()
+            plan.save()
+            return redirect('calendar')
+        context = {
+            'form': form,
+        }
+        return render(request, 'calendar/addcalendar.html', context)
     
 
+class EditPlanView(LoginRequiredMixin, View):
+    def get(self, request, plan_id):
+        profile = request.user.user
+        try:
+            plan = Plan.objects.get(id=plan_id, user=profile)
+            form = PlanForm(instance=plan)
+            context = {
+                'form': form,
+                'plan': plan,
+                'plan_id': plan_id,
+            }
+            return render(request, 'calendar/editcalendar.html', context)
+        except Plan.DoesNotExist:
+            return redirect('calendar')
+
+    def post(self, request, plan_id):
+        profile = request.user.user
+        try:
+            plan = Plan.objects.get(id=plan_id, user=profile)
+            form = PlanForm(request.POST, instance=plan)
+            if form.is_valid():
+                updated_plan = form.save(commit=False)
+                updated_plan.day = updated_plan.start_time.weekday()
+                updated_plan.save()
+                return redirect('calendar')
+            context = {
+                'form': form,
+                'plan': plan,
+                'plan_id': plan_id,
+            }
+            return render(request, 'calendar/editcalendar.html', context)
+        except Plan.DoesNotExist:
+            return redirect('calendar')
+        
+
+class DeletePlanView(LoginRequiredMixin, View):
+    def post(self, request, plan_id):
+        profile = request.user.user
+        plan = get_object_or_404(Plan, id=plan_id, user=profile)
+        plan.delete()
+        return redirect('calendar')

@@ -9,5 +9,8 @@ urlpatterns = [
     path("home/", views.HomeView.as_view(), name="home"),
     path("profile/", views.ProfileEdit.as_view(), name='profile'),
     path("calendar/", views.CalendarView.as_view(), name='calendar'),
+    path("addplan/", views.AddPlanView.as_view(), name='addplan'),
+    path("editplan/<int:plan_id>/", views.EditPlanView.as_view(), name='editplan'),
+    path("deleteplan/<int:plan_id>/", views.DeletePlanView.as_view(), name='deleteplan'),
 ]
 # test change
