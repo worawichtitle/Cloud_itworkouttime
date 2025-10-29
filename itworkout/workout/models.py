@@ -27,7 +27,7 @@ class Plan(models.Model):
     workout = models.ForeignKey(Workout, on_delete=models.SET_NULL, null=True)
     day = models.IntegerField(choices=[(i, day) for i, day in enumerate(
         ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-    )])
+    )], blank=True, null=True)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
 

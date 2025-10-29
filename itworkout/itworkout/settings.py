@@ -77,9 +77,9 @@ WSGI_APPLICATION = 'itworkout.wsgi.application'
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "testdb",
+        "NAME": "itworkout",
         "USER": "postgres",
-        "PASSWORD": "Sunja341011",
+        "PASSWORD": "password",
         "HOST": "localhost",
         "PORT": "5432",
       }

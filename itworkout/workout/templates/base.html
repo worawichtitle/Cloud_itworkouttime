@@ -11,11 +11,17 @@
       {% endblock %}
     </title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style type="text/tailwindcss">
-      @layer components {
-        .form-control {
-          @apply [&>*>input]:mt-1 [&>*>input]:border [&>*>input]:rounded-md [&>*>input]:w-full [&>*>input]:px-3 [&>*>input]:py-2 [&>*>input]:mt-1 [&>*>input]:border [&>*>input]:rounded-md [&>*>input]:w-full [&>*>input]:px-3 [&>*>input]:py-2  [&>*>select]:mt-1 [&>*>select]:border [&>*>select]:rounded-md [&>*>select]:w-full [&>*>select]:px-3 [&>*>select]:py-2 [&>*>select]:mt-1 [&>*>select]:border [&>*>select]:rounded-md [&>*>select]:w-full [&>*>select]:px-3 [&>*>select]:py-2 [&>*>textarea]:mt-1 [&>*>textarea]:border [&>*>textarea]:rounded-md [&>*>textarea]:w-full [&>*>textarea]:px-3 [&>*>textarea]:py-2 [&>*>textarea]:mt-1 [&>*>textarea]:border [&>*>textarea]:rounded-md [&>*>textarea]:w-full [&>*>textarea]:px-3 [&>*>textarea]:py-2
-        }
+    <style>
+      .form-control input {
+        margin-top: 0.25rem; 
+        border-width: 2px;
+        border-color: #e5e7eb;
+        border-radius: 0.75rem;
+        width: 100%;
+        padding: 0.75rem 1rem;
+        outline: none;
+        background-color: rgba(255, 255, 255, 0.7);
+        transition: all 0.2s ease-in-out;
       }
     </style>
   </head>

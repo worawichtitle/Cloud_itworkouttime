@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.views import View
 from workout.models import *
 from django.shortcuts import render, redirect
-from workout.form import *
+from workout.forms import *
 from django.db import transaction
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import logout, login
