@@ -1,0 +1,86 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      {% block title %}
+        Title
+      {% endblock %}
+    </title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+      .form-control input,
+      .form-control select {
+        margin-top: 0.25rem; 
+        border-width: 2px;
+        border-color: #e5e7eb;
+        border-radius: 0.75rem;
+        width: 100%;
+        padding: 0.75rem 1rem;
+        outline: none;
+        background-color: rgba(255, 255, 255, 0.7);
+        transition: all 0.2s ease-in-out;
+      }
+    </style>
+  </head>
+
+  <body>
+    {% block nav %}
+      {% include 'nav.html' %}
+    {% endblock %}
+
+    <section class="p-6 max-w-8xl mx-auto">
+      <article aria-label="Head Content">
+        {% block head %}
+        {% endblock %}
+      </article>
+
+      <article aria-label="Body Content">
+        {% block content %}
+          Content
+        {% endblock %}
+      </article>
+    </section>
+    
+    {% block script %}
+      <script>
+        // Poll chat updates for unread counts and last messages
+        async function pollChatUpdates() {
+          try {
+            const res = await fetch('/chat/updates/');
+            if (!res.ok) return;
+            const data = await res.json();
+
+            // update chat list items if present (show unread on the right-side dot)
+            if (Array.isArray(data.rooms)) {
+              data.rooms.forEach(r => {
+                const el = document.querySelector(`[data-room-id=\"${r.room_id}\"]`);
+                if (el) {
+                  const lastEl = el.querySelector('.last-message');
+                  if (lastEl) lastEl.textContent = r.last_message;
+
+                  // small red dot near the chat item (keeps backward compatibility)
+                  const unreadEl = el.querySelector('.room-unread');
+                  if (unreadEl) {
+                    if (r.unread) unreadEl.classList.remove('hidden'); else unreadEl.classList.add('hidden');
+                  }
+                }
+              });
+            }
+          } catch (e) {
+            // ignore
+          }
+        }
+
+        // start polling
+        pollChatUpdates();
+        setInterval(pollChatUpdates, 2000);
+      </script>
+    {% endblock %}
+  </body>
+
+</html>

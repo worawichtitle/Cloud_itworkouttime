@@ -5,6 +5,7 @@ from django.contrib.auth.models import User as Authen
 class User(models.Model):
     authen = models.OneToOneField(Authen, on_delete=models.CASCADE)
     tel = models.CharField(max_length=20, blank=True, null=True)
+    user_image = models.FileField(upload_to="profile/", blank=True, null=True)
     role = models.CharField(max_length=100, blank=True, null=True, default='user')  # Trainer, admin
 
     def __str__(self):
@@ -12,7 +13,7 @@ class User(models.Model):
 
 
 class Workout(models.Model):
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255) # running, swimming, cardio
     cal125_hour = models.PositiveIntegerField()
     cal155_hour = models.PositiveIntegerField()
     cal185_hour = models.PositiveIntegerField()
@@ -24,11 +25,14 @@ class Workout(models.Model):
 class Plan(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     workout = models.ForeignKey(Workout, on_delete=models.SET_NULL, null=True)
+    day = models.IntegerField(choices=[(i, day) for i, day in enumerate(
+        ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    )], blank=True, null=True)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
 
     def __str__(self):
-        return f"{self.user.username} - {self.workout.name}"
+        return f"{self.user.authen.username} - {self.workout.name}"
 
 
 class ChatRoom(models.Model):

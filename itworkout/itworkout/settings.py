@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -31,6 +32,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
+    'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -69,7 +72,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'itworkout.wsgi.application'
 
-
+ASGI_APPLICATION = 'itworkout.asgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
@@ -130,3 +133,18 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+MEDIA_URL = '/image/'
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'image')
+
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'trainers'
+
+# Channels channel layer: in-memory backend for development.
+# For production use Redis: channels_redis.core.RedisChannelLayer
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
+}

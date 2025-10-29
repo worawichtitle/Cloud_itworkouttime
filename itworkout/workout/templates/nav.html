@@ -1,0 +1,121 @@
+<style>
+    body {
+        font-family: 'Sarabun', sans-serif;
+    }
+
+    .gradient-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .gradient-bg {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    }
+
+    .smooth-transition {
+        transition: all 0.3s ease-in-out;
+    }
+
+    .custom-shadow {
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+</style>
+
+<header class="gradient-header shadow-lg">
+        <nav class="mx-auto py-2 ml-5 mr-10">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-12">
+                    <h1 class="text-2xl font-bold text-white">
+                        It-Workout
+                    </h1>
+                    <ul class="flex space-x-8">
+                        <li>
+                            <a href="{% url 'calendar' %}" class="text-white hover:text-yellow-200 smooth-transition font-medium border-b-2 border-transparent hover:border-yellow-200">Plan</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'calculate' %}" class="text-white hover:text-yellow-200 smooth-transition font-medium border-b-2 border-transparent hover:border-yellow-200">Calculate</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'history' %}" class="text-white hover:text-yellow-200 smooth-transition font-medium border-b-2 border-transparent hover:border-yellow-200">History</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'chat_list' %}" class="text-white hover:text-yellow-200 smooth-transition font-medium border-b-2 border-transparent hover:border-yellow-200">Chat</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'trainers' %}" class="text-white hover:text-yellow-200 smooth-transition font-medium border-b-2 border-transparent hover:border-yellow-200">Trainer</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="relative group">
+                    <button id="profile-button" class="w-11 h-11 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 hover:shadow-xl border-2 border-white border-opacity-30 overflow-hidden">
+                        {% if user.user.user_image %}
+                            <img src="{{ user.user.user_image.url }}" 
+                                 alt="{{ user.get_full_name }}" 
+                                 class="w-full h-full object-cover">
+                        {% else %}
+                            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                            </svg>
+                        {% endif %}
+                    </button>
+
+                    <!-- Profile Dropdown Menu (aside) -->
+                    <aside class="absolute right-0 top-full mt-3 w-80 opacity-0 invisible group-hover:opacity-100 group-hover:visible transform transition-all ease-in-out z-50">
+                        <div class="bg-white rounded-xl custom-shadow overflow-hidden border border-white border-opacity-20">
+                            <!-- User Info Header -->
+                            <div class="px-6 py-5 border-b border-white border-opacity-20 bg-gradient-to-r from-purple-500 to-blue-500 bg-opacity-10">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-12 h-12 rounded-full shadow-lg overflow-hidden">
+                                        {% if user.user.user_image %}
+                                            <img src="{{ user.user.user_image.url }}" 
+                                                 alt="{{ user.get_full_name }}" 
+                                                 class="w-full h-full object-cover">
+                                        {% else %}
+                                            <div class="w-full h-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center">
+                                                <svg class="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                                                </svg>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-gray-800 text-lg">{{ user.first_name }} {{ user.last_name }}</p>
+                                        <p class="text-sm text-gray-600 font-medium">@{{ user.username }}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Menu Items -->
+                            <div class="py-3">
+                                <a href="{% url 'profile' %}" class="w-full px-6 py-4 text-left hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:border-r-4 hover:border-blue-500 transition-all duration-300 ease-in-out group/item flex items-center space-x-3">
+                                    <svg class="w-5 h-5 text-gray-500 group-hover/item:text-blue-500 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                    <span class="text-gray-700 group-hover/item:text-blue-600 font-medium transition-colors duration-200">Edit Profile</span>
+                                    <div class="ml-auto opacity-0 group-hover/item:opacity-100 transition-opacity duration-200">
+                                        <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                        </svg>
+                                    </div>
+                                </a>
+
+                                <hr class="my-2 border-gray-100">
+
+                                <a href="{% url 'logout' %}" class="w-full px-6 py-4 text-left text-red-600 hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50 hover:border-r-4 hover:border-red-500 transition-all duration-300 ease-in-out group/item flex items-center space-x-3">
+                                    <svg class="w-5 h-5 text-red-500 group-hover/item:text-red-600 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                    </svg>
+                                    <span class="group-hover/item:text-red-700 font-medium transition-colors duration-200">Log out</span>
+                                    <div class="ml-auto opacity-0 group-hover/item:opacity-100 transition-opacity duration-200">
+                                        <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                        </svg>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </aside>
+                </div>
+            </div>
+        </nav>
+</header>

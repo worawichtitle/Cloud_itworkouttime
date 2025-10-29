@@ -1,0 +1,111 @@
+{% extends "logins/base_login.html" %}
+{% load static %}
+
+{% block title %}Sign Up - IT-Workout{% endblock %}
+
+{% block content %}
+<body class="gradient-bg flex flex-col items-center justify-center gap-8 mb-12">
+
+    <!-- Header with "IT-Workout" -->
+    <header class="flex items-center justify-center text-center">
+        <h1 class="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mt-10">
+            IT-Workout
+        </h1>
+    </header>
+
+    <div class="glass-effect p-8 rounded-2xl custom-shadow w-full max-w-md mt-5 border border-white border-opacity-30">
+        <h2 class="text-3xl font-bold text-center mb-8 bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent leading-loose">Sign Up</h2>
+
+        <form method="POST" action="{% url 'register' %}" class="form-control">
+            {% csrf_token %}
+             {{ form.user.non_field_errors }}
+             {{ form.customer.non_field_errors }}
+
+            <!-- Username Field -->
+            <div class="mb-4">
+                <label for="{{ form.user.username.id_for_label }}" class="block text-sm font-semibold mb-3 text-gray-700">Username</label>
+                {{ form.user.username }}
+                {% if form.user.username.errors %}
+                    <div class="text-sm text-red-600">{{ form.user.username.errors }}</div>
+                {% endif %}
+            </div>
+
+            <!-- First Name and Last Name Fields -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <!-- First Name Field -->
+                <div>
+                    <label for="{{ form.user.first_name.id_for_label }}" class="block text-sm font-semibold mb-3 text-gray-700">First Name</label>
+                    {{ form.user.first_name }}
+                    {% if form.user.first_name.errors %}
+                        <div class="text-sm text-red-600">{{ form.user.first_name.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Last Name Field -->
+                <div>
+                    <label for="{{ form.user.last_name.id_for_label }}" class="block text-sm font-semibold mb-3 text-gray-700">Last Name</label>
+                    {{ form.user.last_name }}
+                    {% if form.user.last_name.errors %}
+                        <div class="text-sm text-red-600">{{ form.user.last_name.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Email Field -->
+                <div>
+                    <label for="{{ form.user.email.id_for_label }}" class="block text-sm font-semibold mb-3 text-gray-700">Email</label>
+                    {{ form.user.email }}
+                    {% if form.user.email.errors %}
+                        <div class="text-sm text-red-600">{{ form.user.email.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Tel Field -->
+                <div>
+                    <label for="{{ form.customer.tel.id_for_label }}" class="block text-sm font-semibold mb-3 text-gray-700">Telephone</label>
+                    {{ form.customer.tel }}
+                    {% if form.customer.tel.errors %}
+                        <div class="text-sm text-red-600">{{ form.customer.tel.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+
+            <!-- Password Field -->
+            <div class="mb-4">
+                <label for="{{ form.user.password1.id_for_label }}" class="block text-sm font-semibold mb-3 text-gray-700">Password</label>
+                {{ form.user.password1 }}
+                {% if form.user.password1.errors %}
+                    <div class="text-sm text-red-600">{{ form.user.password1.errors }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Confirm Password Field -->
+            <div class="mb-6">
+                <label for="{{ form.user.password2.id_for_label }}" class="block text-sm font-semibold mb-3 text-gray-700">Confirm Password</label>
+                {{ form.user.password2 }}
+                {% if form.user.password2.errors %}
+                    <div class="text-sm text-red-600">{{ form.user.password2.errors }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="w-full py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-xl hover:from-green-600 hover:to-emerald-600 shadow-lg hover:shadow-xl">
+                Sign Up
+            </button>
+
+            {% if messages %}
+                <div class="mt-6 p-4 bg-gradient-to-r from-red-50 to-pink-50 rounded-xl border border-red-200">
+                    {% for message in messages %}
+                        <p class="text-center text-sm text-red-600 font-medium">{{ message }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </form>
+
+        <!-- Login Link -->
+        <div class="mt-6 text-center">
+            <p class="text-sm text-gray-600">Already have an account? <a href="{% url 'login' %}" class="text-blue-600 hover:text-blue-700 font-semibold hover:underline">Log In</a></p>
+        </div>
+    </div>
+</body>
+{% endblock %}
