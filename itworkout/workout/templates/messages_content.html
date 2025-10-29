@@ -1,0 +1,10 @@
+{% for message in messages %}
+    <div class="flex {% if message.sender == request.user.user %}justify-end{% else %}justify-start{% endif %}">
+        <div class="max-w-[70%] {% if message.sender == request.user.user %}bg-blue-500 text-white{% else %}bg-gray-200 text-gray-800{% endif %} rounded-lg px-4 py-2">
+            <p>{{ message.content }}</p>
+            <span class="text-xs {% if message.sender == request.user.user %}text-blue-100{% else %}text-gray-500{% endif %}">
+                {{ message.sent_at|date:"g:i A" }}
+            </span>
+        </div>
+    </div>
+{% endfor %}
