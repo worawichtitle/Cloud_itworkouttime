@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg">
+        <div class="p-4 border-b border-gray-200">
+            <h2 class="text-xl font-semibold">Chat with {{ other_user.authen.username }}</h2>
+            <p class="text-sm text-gray-500 mt-1">Chat started {{ room.created_at }}</p>
+        </div>
+        
+        <div id="messages" class="p-4 h-96 overflow-y-auto space-y-4">
+            {% include "messages_content.html" %}
+        </div>
+
+        <form id="message-form" class="p-4 border-t border-gray-200">
+            {% csrf_token %}
+            <div class="flex space-x-2">
+                <input type="text" 
+                       id="message-input"
+                       name="message" 
+                       class="flex-1 rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:border-blue-500"
+                       placeholder="Type your message..."
+                       required>
+                <button type="submit" 
+                        class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 focus:outline-none">
+                    Send
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const messagesContainer = document.getElementById('messages');
+    const messageForm = document.getElementById('message-form');
+    const messageInput = document.getElementById('message-input');
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    function scrollToBottom() {
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    function updateMessages() {
+        fetch('{% url "chat_messages" room.id %}')
+            .then(response => response.text())
+            .then(html => {
+                const wasAtBottom = messagesContainer.scrollHeight - messagesContainer.scrollTop === messagesContainer.clientHeight;
+                messagesContainer.innerHTML = html;
+                if (wasAtBottom) {
+                    scrollToBottom();
+                }
+                // Mark as read whenever we get new messages
+                markRoomRead();
+            });
+    }
+
+    messageForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const message = messageInput.value.trim();
+        if (!message) return;
+
+        fetch('{% url "chat_room" room.id %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: `message=${encodeURIComponent(message)}`
+        })
+        .then(response => {
+            if (response.ok) {
+                messageInput.value = '';
+                updateMessages();
+                scrollToBottom();
+            }
+        });
+    });
+
+    // Initial scroll to bottom
+    scrollToBottom();
+
+    // Update messages every 3 seconds
+    setInterval(updateMessages, 3000);
+
+    // mark room read when user leaves (use sendBeacon if available to ensure it reaches the server)
+    function markRoomRead() {
+        const url = '{% url "chat_mark_read" room.id %}';
+        if (navigator.sendBeacon) {
+            const form = new FormData();
+            navigator.sendBeacon(url, form);
+            return;
+        }
+        // fallback: do a fetch (best-effort)
+        fetch(url, { method: 'POST', headers: { 'X-CSRFToken': csrfToken } }).catch(()=>{});
+    }
+
+    window.addEventListener('beforeunload', markRoomRead);
+</script>
+{% endblock %}

@@ -45,7 +45,39 @@
     </section>
     
     {% block script %}
-      <script src="/"></script>
+      <script>
+        // Poll chat updates for unread counts and last messages
+        async function pollChatUpdates() {
+          try {
+            const res = await fetch('/chat/updates/');
+            if (!res.ok) return;
+            const data = await res.json();
+
+            // update chat list items if present (show unread on the right-side dot)
+            if (Array.isArray(data.rooms)) {
+              data.rooms.forEach(r => {
+                const el = document.querySelector(`[data-room-id=\"${r.room_id}\"]`);
+                if (el) {
+                  const lastEl = el.querySelector('.last-message');
+                  if (lastEl) lastEl.textContent = r.last_message;
+
+                  // small red dot near the chat item (keeps backward compatibility)
+                  const unreadEl = el.querySelector('.room-unread');
+                  if (unreadEl) {
+                    if (r.unread) unreadEl.classList.remove('hidden'); else unreadEl.classList.add('hidden');
+                  }
+                }
+              });
+            }
+          } catch (e) {
+            // ignore
+          }
+        }
+
+        // start polling
+        pollChatUpdates();
+        setInterval(pollChatUpdates, 2000);
+      </script>
     {% endblock %}
   </body>
 

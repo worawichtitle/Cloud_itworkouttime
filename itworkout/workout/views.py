@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 from workout.models import *
 from django.shortcuts import render, redirect
@@ -8,6 +8,21 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import logout, login
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.views.generic import ListView
+from django.shortcuts import get_object_or_404
+from django.http import HttpResponseForbidden
+from django.urls import reverse
+from django.db.models import Q
+from django.utils import timezone
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
+from workout.models import ChatRoom, ChatMessage
+from django.apps import apps
+from django.contrib import messages
+from django.utils.timezone import now
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.contrib.auth.decorators import login_required
 
 class LoginView(View):
     def get(self, request):
@@ -74,6 +89,26 @@ class RegisterView(View):
         
 class HomeView(View): 
     def get(self, request):
+        # If user is authenticated, show trainers on home page
+        if request.user.is_authenticated:
+            try:
+                current_profile = request.user.user
+            except Exception:
+                current_profile = None
+
+            profile_model = None
+            if current_profile:
+                profile_model = current_profile.__class__
+            else:
+                profile_model = apps.get_model('workout', 'User')
+
+            if current_profile:
+                trainers = profile_model.objects.filter(role='trainer').exclude(id=current_profile.id)
+            else:
+                trainers = profile_model.objects.filter(role='trainer')
+
+            return render(request, 'trainers.html', {'trainers': trainers})
+
         return render(request, 'base.html')
     
 class ProfileEdit(LoginRequiredMixin, View):
@@ -114,3 +149,193 @@ class ProfileEdit(LoginRequiredMixin, View):
             return render(request, 'homes/profile.html', context)
         except User.DoesNotExist:
             return redirect('home')
+        
+    
+class TrainersList(LoginRequiredMixin, View):
+    def get(self, request):
+        # list all trainers except the current user's profile
+        try:
+            current_profile = request.user.user
+        except Exception:
+            current_profile = None
+
+        trainers = []
+        # Resolve the profile model from the workout app to avoid name collisions
+        profile_model = None
+        if current_profile:
+            profile_model = current_profile.__class__
+        else:
+            profile_model = apps.get_model('workout', 'User')
+
+        if current_profile:
+            trainers = profile_model.objects.filter(role='trainer').exclude(id=current_profile.id)
+        else:
+            trainers = profile_model.objects.filter(role='trainer')
+
+        return render(request, 'trainers.html', {'trainers': trainers})
+
+
+class ChatList(LoginRequiredMixin, View):
+    def get(self, request):
+        try:
+            me = request.user.user
+        except Exception:
+            return redirect('home')
+
+        # rooms where the profile is either user or trainer
+        rooms = ChatRoom.objects.filter(Q(user=me) | Q(trainer=me)).order_by('-created_at')
+        return render(request, 'chat_list.html', {'rooms': rooms, 'me': me})
+
+
+class ChatStart(LoginRequiredMixin, View):
+    def get(self, request, trainer_id):
+        # find trainer profile using the workout app's User (profile) model
+        profile_model = apps.get_model('workout', 'User')
+        trainer = get_object_or_404(profile_model, id=trainer_id)
+        try:
+            me = request.user.user
+        except Exception:
+            return redirect('trainers')
+
+        # look for existing room either direction
+        room = ChatRoom.objects.filter(user=me, trainer=trainer).first()
+        if not room:
+            room = ChatRoom.objects.filter(user=trainer, trainer=me).first()
+
+        if not room:
+            # create one
+            room = ChatRoom.objects.create(user=me, trainer=trainer)
+
+        return redirect(reverse('chat_room', kwargs={'room_id': room.id}))
+
+
+class ChatRoomView(LoginRequiredMixin, View):
+    def get(self, request, room_id):
+        room = get_object_or_404(ChatRoom, id=room_id)
+        try:
+            me = request.user.user
+        except Exception:
+            return redirect('trainers')
+
+        # security: ensure user is participant
+        if me != room.user and me != room.trainer:
+            return HttpResponseForbidden('Not a participant of this chat')
+
+        # mark room as read for this participant up to the latest message timestamp (prevents race where
+        # a message sent just before opening would still appear as unread)
+        last_msg = room.messages.order_by('-sent_at').first()
+        if last_msg:
+            last_read_time = last_msg.sent_at
+        else:
+            last_read_time = timezone.now()
+
+        if me == room.user:
+            room.user_last_read = last_read_time
+        else:
+            room.trainer_last_read = last_read_time
+        room.save()
+
+        messages = room.messages.order_by('sent_at')[:500]
+        return render(request, 'chat_room.html', {'room': room, 'messages': messages, 'me': me})
+
+    def post(self, request, room_id):
+        room = get_object_or_404(ChatRoom, id=room_id)
+        me = request.user.user
+
+        if me != room.user and me != room.trainer:
+            return HttpResponseForbidden('Not a participant of this chat')
+
+        message = request.POST.get('message')
+        if message:
+            ChatMessage.objects.create(
+                room=room,
+                sender=me,
+                content=message
+            )
+            
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'status': 'ok'})
+        return redirect('chat_room', room_id=room_id)
+
+
+class ChatMessagesView(LoginRequiredMixin, View):
+    def get(self, request, room_id):
+        room = get_object_or_404(ChatRoom, id=room_id)
+        me = request.user.user
+
+        if me != room.user and me != room.trainer:
+            return HttpResponseForbidden('Not a participant of this chat')
+
+        messages = room.messages.order_by('sent_at')[:500]
+        other_user = room.trainer if me == room.user else room.user
+        return render(request, 'messages_content.html', {
+            'messages': messages,
+            'request': request,
+            'other_user': other_user
+        })
+
+
+class ChatUpdatesView(LoginRequiredMixin, View):
+    def get(self, request):
+        try:
+            me = request.user.user
+        except Exception:
+            return JsonResponse({'error': 'not authenticated'}, status=403)
+
+        rooms = ChatRoom.objects.filter(Q(user=me) | Q(trainer=me)).order_by('-created_at')
+        data = []
+        total_unread = 0
+        for room in rooms:
+            last = room.messages.order_by('-sent_at').first()
+            if not last:
+                continue
+            if me == room.user:
+                last_read = room.user_last_read
+                other = room.trainer
+            else:
+                last_read = room.trainer_last_read
+                other = room.user
+
+            unread = False
+            if last and last.sender != me:
+                if not last_read or last.sent_at > last_read:
+                    unread = True
+                    total_unread += 1
+
+            data.append({
+                'room_id': room.id,
+                'other_username': other.authen.username,
+                'last_message': last.content[:120],
+                'last_sent_at': last.sent_at.isoformat(),
+                'unread': unread,
+            })
+
+        return JsonResponse({'rooms': data, 'total_unread': total_unread})
+
+
+@login_required
+@require_POST
+def chat_mark_read(request, room_id):
+    """Mark the given room as read for the current user up to the latest message timestamp."""
+    room = get_object_or_404(ChatRoom, id=room_id)
+    try:
+        me = request.user.user
+    except Exception:
+        return JsonResponse({'error': 'no profile'}, status=403)
+
+    if me != room.user and me != room.trainer:
+        return JsonResponse({'error': 'not participant'}, status=403)
+
+    last_msg = room.messages.order_by('-sent_at').first()
+    if last_msg:
+        last_read_time = last_msg.sent_at
+    else:
+        last_read_time = timezone.now()
+
+    if me == room.user:
+        room.user_last_read = last_read_time
+    else:
+        room.trainer_last_read = last_read_time
+    room.save()
+
+    return JsonResponse({'status': 'ok'})

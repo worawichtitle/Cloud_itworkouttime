@@ -32,6 +32,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
+    'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -70,7 +72,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'itworkout.wsgi.application'
 
-
+ASGI_APPLICATION = 'itworkout.asgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
@@ -137,3 +139,12 @@ MEDIA_URL = '/image/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'image')
 
 LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'trainers'
+
+# Channels channel layer: in-memory backend for development.
+# For production use Redis: channels_redis.core.RedisChannelLayer
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
+}

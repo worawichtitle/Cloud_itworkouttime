@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Chats{% endblock %}
+
+{% block content %}
+  <h2 class="text-2xl font-bold mb-4">Chats</h2>
+  <div class="space-y-3">
+    {% for room in rooms %}
+      <a data-room-id="{{ room.id }}" href="{% url 'chat_room' room.id %}" class="block p-4 bg-white rounded shadow flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+          <div class="w-12 h-12 rounded-full bg-gray-100 overflow-hidden">
+            {% if room.user.user_image %}
+              <img src="{{ room.user.user_image.url }}" class="w-full h-full object-cover">
+            {% else %}
+              <div class="w-full h-full flex items-center justify-center text-gray-400">No</div>
+            {% endif %}
+          </div>
+          <div>
+            <div class="font-semibold">{% if me == room.user %}{{ room.trainer.authen.username }}{% else %}{{ room.user.authen.username }}{% endif %}</div>
+            <div class="text-sm text-gray-700 last-message mt-1"></div>
+            <div class="text-sm text-gray-500 last-time"></div>
+          </div>
+        </div>
+        <div>
+          <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </div>
+      </a>
+    {% empty %}
+      <p>No chats yet. Start one from the trainers list.</p>
+    {% endfor %}
+  </div>
+
+<script>
+function formatMessageTime(isoString) {
+    const date = new Date(isoString);
+    const now = new Date();
+    const isToday = date.toDateString() === now.toDateString();
+    
+    if (isToday) {
+        return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    } else {
+        return date.toLocaleDateString('en-US', { 
+            month: 'short', 
+            day: 'numeric',
+            hour: '2-digit', 
+            minute: '2-digit'
+        });
+    }
+}
+
+function updateRoomsList() {
+    fetch('{% url "chat_updates" %}')
+        .then(response => response.json())
+        .then(data => {
+            data.rooms.forEach(room => {
+                const roomElement = document.querySelector(`[data-room-id="${room.room_id}"]`);
+                if (roomElement) {
+                    const lastMessageElement = roomElement.querySelector('.last-message');
+                    const lastTimeElement = roomElement.querySelector('.last-time');
+                    
+                    if (lastMessageElement && room.last_message) {
+                        lastMessageElement.textContent = room.last_message;
+                    }
+                    
+                    if (lastTimeElement && room.last_sent_at) {
+                        lastTimeElement.textContent = formatMessageTime(room.last_sent_at);
+                    }
+                }
+            });
+        });
+}
+
+// Update initially and then every 3 seconds
+updateRoomsList();
+setInterval(updateRoomsList, 3000);
+</script>
+{% endblock %}
