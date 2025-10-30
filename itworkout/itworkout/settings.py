@@ -79,8 +79,8 @@ ASGI_APPLICATION = 'itworkout.asgi.application'
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "itworkout",
-        "USER": "postgres",
+        "NAME": "postgres",
+        "USER": "itworkout",
         "PASSWORD": "password",
         "HOST": "itworkout.crz1yra97fks.us-east-1.rds.amazonaws.com",
         "PORT": "5432",
