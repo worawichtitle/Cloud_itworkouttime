@@ -82,7 +82,7 @@ DATABASES = {
         "NAME": "itworkout",
         "USER": "postgres",
         "PASSWORD": "password",
-        "HOST": "itworkout.crz1yra97fks.us-east-1.rds.amazonaws.com",
+        "HOST": "database-1.crz1yra97fks.us-east-1.rds.amazonaws.com",
         "PORT": "5432",
       }
   }
