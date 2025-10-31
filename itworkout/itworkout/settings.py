@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 import os
 
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -41,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'workout',
+    'storages',
 ]
 
 MIDDLEWARE = [
@@ -76,6 +78,8 @@ ASGI_APPLICATION = 'itworkout.asgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -110,6 +114,12 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
+AWS_ACCESS_KEY_ID = 'ASIA3G647IU3HU4AZGFR'
+AWS_SECRET_ACCESS_KEY = 'fPCTHxu83ud8/iser99yVS3PvfuSfdTe5YpzMbOD'
+AWS_STORAGE_BUCKET_NAME = 'itworkout'
+AWS_S3_REGION_NAME = 'us-east-1'
+
+
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'Asia/Bangkok'
@@ -127,16 +137,16 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
-
+STATIC_URL = 'https://itworkout.s3.amazonaws.com/static/'
+STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
+MEDIA_URL = 'https://itworkout.s3.amazonaws.com/image/'
+DEFAULT_AUTO_FIELD = 'storages.backends.s3boto3.S3Boto3Storage'
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+# MEDIA_ROOT = os.path.join(BASE_DIR, 'image')
 
-MEDIA_URL = '/image/'
 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'image')
 
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'trainers'
