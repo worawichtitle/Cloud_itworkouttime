@@ -166,3 +166,6 @@ CHANNEL_LAYERS = {
         'BACKEND': 'channels.layers.InMemoryChannelLayer',
     },
 }
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
