@@ -60,7 +60,7 @@ class RegisterView(View):
     def post(self, request):
         user = UserCreationForm(request.POST)
         # accept uploaded files for customer (profile image)
-        customer = UserForm(request.POST)
+        customer = UserForm(request.POST, request.FILES)
         form = {
             "user" : user,
             "customer" : customer,
