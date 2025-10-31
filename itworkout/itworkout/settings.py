@@ -154,8 +154,7 @@ STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/static/'
 
 AWS_S3_CUSTOM_DOMAIN = '%s.s3.%s.amazonaws.com' % (AWS_STORAGE_BUCKET_NAME, AWS_S3_REGION_NAME)
 
-STATIC_URL = 'https://%s/static/' % AWS_S3_CUSTOM_DOMAIN
-MEDIA_URL = 'https://%s/image/' % AWS_S3_CUSTOM_DOMAIN
+
 
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'trainers'
