@@ -119,6 +119,8 @@ AWS_SECRET_ACCESS_KEY = 'fPCTHxu83ud8/iser99yVS3PvfuSfdTe5YpzMbOD'
 AWS_STORAGE_BUCKET_NAME = 'itworkout'
 AWS_S3_REGION_NAME = 'us-east-1'
 
+AWS_DEFAULT_ACL = 'public-read'
+
 
 LANGUAGE_CODE = 'en-us'
 
