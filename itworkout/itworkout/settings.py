@@ -151,8 +151,13 @@ MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/'
 STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
 
 # MEDIA_ROOT = os.path.join(BASE_DIR, 'image')
+AWS_S3_OBJECT_PARAMETERS = {
+    'CacheControl': 'max-age=86400',
+}
+AWS_S3_FILE_OVERWRITE = False
+AWS_DEFAULT_ACL = 'public-read'  # หรือ 'private' แล้วแต่ต้องการ
+AWS_QUERYSTRING_AUTH = False
 
-AWS_S3_CUSTOM_DOMAIN = '%s.s3.%s.amazonaws.com' % (AWS_STORAGE_BUCKET_NAME, AWS_S3_REGION_NAME)
 
 
 
