@@ -142,7 +142,7 @@ STATIC_URL = 'https://itworkout.s3.us-east-1.amazonaws.com/static/'
 STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-MEDIA_URL = 'https://itworkout.s3.us-east-1.amazonaws.com/image/'
+MEDIA_URL = 'https://itworkout.s3.us-east-1.amazonaws.com/'
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
 # MEDIA_ROOT = os.path.join(BASE_DIR, 'image')
