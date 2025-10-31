@@ -119,7 +119,6 @@ AWS_SECRET_ACCESS_KEY = 'fPCTHxu83ud8/iser99yVS3PvfuSfdTe5YpzMbOD'
 AWS_STORAGE_BUCKET_NAME = 'itworkout'
 AWS_S3_REGION_NAME = 'us-east-1'
 
-AWS_DEFAULT_ACL = 'public-read'
 
 
 LANGUAGE_CODE = 'en-us'
@@ -148,7 +147,10 @@ DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
 # MEDIA_ROOT = os.path.join(BASE_DIR, 'image')
 
+AWS_S3_CUSTOM_DOMAIN = '%s.s3.%s.amazonaws.com' % (AWS_STORAGE_BUCKET_NAME, AWS_S3_REGION_NAME)
 
+STATIC_URL = 'https://%s/static/' % AWS_S3_CUSTOM_DOMAIN
+MEDIA_URL = 'https://%s/image/' % AWS_S3_CUSTOM_DOMAIN
 
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'trainers'
