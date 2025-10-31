@@ -142,7 +142,7 @@ STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 MEDIA_URL = 'https://itworkout.s3.amazonaws.com/image/'
-DEFAULT_AUTO_FIELD = 'storages.backends.s3boto3.S3Boto3Storage'
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # MEDIA_ROOT = os.path.join(BASE_DIR, 'image')
 
