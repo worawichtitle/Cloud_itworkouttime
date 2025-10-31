@@ -116,6 +116,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 AWS_ACCESS_KEY_ID = 'ASIA3G647IU3IVJQMQWH'
 AWS_SECRET_ACCESS_KEY = '/9c4L640fXIvScwSGmZ2mgm90CmoRskuG40LWbUk'
+AWS_SESSION_TOKEN = 'IQoJb3JpZ2luX2VjEEoaCXVzLXdlc3QtMiJHMEUCIBQrbrcfoYccbmDXS2ZIJ8NSm/OUAOWmnrIUSka8kyFEAiEA3Y8bSOhI1SUSJH6bKZzEZ93n98EFT5jANBVl+2SbuIQqrgIIExAAGgw3NzA4NzMxODE0OTQiDNEvx1RyJWsRblM51yqLAtZYhyrAI8a94rZGqh+tcxSedDxmZ/RF2+zf/mmr5j/wCwgEGzouuQjvtyEmoNHND38r7qx4DZG9GhhxZ6KUAOsP1tIQdjmlJSgheg+qvDC5D1Oz/P4dRNXs3v5XHCQ2k0YITA6D7GFxUvkkvR9v0RLAd1xx1fXrQXxwuOZ5GtcYpn6RrMKDtP0tJQQBViwHXy/fXeuXvXw67pa+VeMNqsTqCNLRUwGBqGvRrumCzF+FVwrYUVc0pN3zBSy5ofG6EQswRrzNWbhgsMICCT1QNLGLF37VwO6w2Q37RaMw8FPOuR6T8pKL67QKVXJ+Af2HGK583RsQI2yXCOzOkzDeYSCjIYzGPnqWZeDO1zDemJLIBjqdAbyUOEeOA1SJSHOLKvrLVT9Jtmls7PGDAfByxZSfI81PHDL7VOiTozqPfMcV/yvnFa7E4Nws1GCd9gfcTxVF4neiwjsLY+L/dcWFtxIxD+LLN6hSpT/zjqHZuF84xKXL98MSuC6nsL9607GRyz5i/PnHYP0Bkq7xZQTYRr8AJ0z0OpjeChO2mtZn83TPvJCVpxXHREXzDFATxsOZ798='
 AWS_STORAGE_BUCKET_NAME = 'itworkout'
 AWS_S3_REGION_NAME = 'us-east-1'
 
@@ -137,13 +138,17 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
+AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com'
 
-STATIC_URL = 'https://itworkout.s3.us-east-1.amazonaws.com/static/'
-STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-MEDIA_URL = 'https://itworkout.s3.us-east-1.amazonaws.com/'
+# บอกให้ S3 storage ใช้ prefix 'image'
+AWS_LOCATION = 'image'
+
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+# แล้วตั้ง MEDIA_URL ให้สอดคล้องกับ AWS_LOCATION
+MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/'
+STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/static/'
 
 # MEDIA_ROOT = os.path.join(BASE_DIR, 'image')
 
